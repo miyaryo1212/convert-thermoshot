@@ -13,7 +13,7 @@ def rdimg(src):
     h, s, v = cv.split(img_hsv)
 
     cv.imshow("img", img)
-    cv.imshow("img hsv", img_hsv)
+    #cv.imshow("img hsv", img_hsv)
     cv.waitKey(0)
     cv.destroyAllWindows()
 
@@ -29,11 +29,21 @@ def cvtlist(list, path):
             list_value = list[y][x]
             sheet.cell(y + 1, x + 1, list_value)
 
+    """
+    for row_num in range(240):
+        sheet.row_dimensions[row_num + 1].height = 20
+
+    for column_num in range(320):
+        sheet.column_dimensions[column_num + 1].width = 20
+    """
+
     wb.save(path)
 
 
 if __name__ == "__main__":
     src = "./photos/sample1.jpg"
     v = rdimg(src)
-    path = "./output/saved_{}.xlsx".format(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+    path = "./output/saved_{}.xlsx".format(
+        datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    )
     cvtlist(v, path)
