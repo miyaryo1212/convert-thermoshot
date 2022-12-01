@@ -24,10 +24,10 @@ def cvtlist(list, path):
     wb = opxl.Workbook()
     sheet = wb.worksheets[0]
 
-    for y in range(120):
-        for x in range(160):
+    for y in range(240):
+        for x in range(320):
             list_value = list[y][x]
-            sheet.cell(x + 1, y + 1, list_value)
+            sheet.cell(y + 1, x + 1, list_value)
 
     wb.save(path)
 
