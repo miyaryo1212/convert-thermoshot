@@ -14,7 +14,7 @@ def rdimg(src, min, max):
 
     for y in range(240):
         for x in range(320):
-            v[y][x] = 20 + ((max - min) / 255 * v[y][x])
+            v[y][x] = min + ((max - min) / 255 * v[y][x])
 
     cv.imshow("img", img)
     # cv.imshow("img hsv", img_hsv)
