@@ -1,6 +1,7 @@
 import datetime
 import math
 import os
+import sys
 import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
@@ -24,6 +25,48 @@ def choosefile():
         quit()
 
     return file
+
+
+def askminmax():
+    root = tkinter.Tk()
+    root.withdraw()
+
+    root.title("設定温度を小数第1位まで入力")
+    root.geometry("400x120")
+
+    def ok_get(event):
+        root.quit()
+
+    label_min = tkinter.Label(root, text="最小温度：")
+    label_max = tkinter.Label(root, text="最大温度：")
+    label_min.place(x=20, y=20)
+    label_max.place(x=20, y=50)
+
+    editbox_min = tkinter.Entry(root, width=40)
+    editbox_min.insert(tkinter.END, "")
+    editbox_min.place(x=100, y=20)
+
+    editbox_max = tkinter.Entry(root, width=40)
+    editbox_max.insert(tkinter.END, "")
+    editbox_max.place(x=100, y=50)
+
+    button = tkinter.Button(root, text="OK")
+    button.bind("<Button-1>", ok_get)
+    button.place(x=300, y=80)
+
+    root.bind("<Return>", ok_get)
+
+    root.deiconify()
+    root.mainloop()
+    root.withdraw()
+
+    if not (editbox_min.get() or editbox_max.get()):
+        tkinter.messagebox.showinfo("rdimg.py", "設定温度を入力してください。プログラムを終了します。")
+        quit()
+
+    min, max = float(editbox_min.get()), float(editbox_max.get())
+
+    return min, max
 
 
 def rdimg(src, min, max):
@@ -66,7 +109,9 @@ def cvtlist(list, path):
 if __name__ == "__main__":
     src = choosefile()
 
-    v = rdimg(src, 20, 100)
+    temp_min, temp_max = askminmax()
+
+    v = rdimg(src, temp_min, temp_max)
 
     time_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     path = "./output/saved_{}.xlsx".format(time_now)
