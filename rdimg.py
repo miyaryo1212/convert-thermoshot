@@ -1,10 +1,25 @@
 import datetime
 import math
+import os
+import tkinter
+import tkinter.filedialog
+import tkinter.messagebox
 
 import cv2 as cv
 import matplotlib as plt
 import numpy as np
 import openpyxl as opxl
+
+
+def choosefile():
+    root = tkinter.Tk()
+    root.withdraw()
+    fType = [("", "*")]
+    iDir = os.path.abspath(os.path.dirname(__file__))
+    tkinter.messagebox.showinfo("rdimg.py", "F30サーモショットで撮影した320x240の画像を選択")
+    file = tkinter.filedialog.askopenfilename(filetypes=fType, initialdir=iDir)
+
+    return file
 
 
 def rdimg(src, min, max):
@@ -45,14 +60,12 @@ def cvtlist(list, path):
 
 
 if __name__ == "__main__":
-    src = "./photos/sample1.jpg"
+    src = choosefile()
+
     v = rdimg(src, 20, 100)
-    path = "./output/saved_{}.xlsx".format(
-        datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    )
+
+    time_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    path = "./output/saved_{}.xlsx".format(time_now)
     cvtlist(v, path)
-    print(
-        'Saved in to "saved_{}.xlsx"'.format(
-            datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        )
-    )
+
+    print('Saved in to "saved_{}.xlsx"'.format(time_now))
