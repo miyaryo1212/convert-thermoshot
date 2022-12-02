@@ -19,6 +19,10 @@ def choosefile():
     tkinter.messagebox.showinfo("rdimg.py", "F30サーモショットで撮影した320x240の画像を選択")
     file = tkinter.filedialog.askopenfilename(filetypes=fType, initialdir=iDir)
 
+    if not file:
+        tkinter.messagebox.showinfo("rdimg.py", "画像を選択してください。プログラムを終了します。")
+        quit()
+
     return file
 
 
@@ -69,3 +73,6 @@ if __name__ == "__main__":
     cvtlist(v, path)
 
     print('Saved in to "saved_{}.xlsx"'.format(time_now))
+    tkinter.messagebox.showinfo(
+        "rdimg.py", 'Saved in to "saved_{}.xlsx"'.format(time_now)
+    )
