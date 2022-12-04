@@ -107,6 +107,13 @@ def cvtlist(list, path):
 
 
 if __name__ == "__main__":
+    import ctypes
+
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(True)
+    except:
+        pass
+
     src = choosefile()
 
     temp_min, temp_max = askminmax()
