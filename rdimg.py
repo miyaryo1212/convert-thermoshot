@@ -126,5 +126,5 @@ if __name__ == "__main__":
 
     print('Saved in to "saved_{}.xlsx"'.format(time_now))
     tkinter.messagebox.showinfo(
-        "rdimg.py", 'Saved in to "saved_{}.xlsx"'.format(time_now)
+        "rdimg.py", 'Saved into "saved_{}.xlsx"'.format(time_now)
     )
