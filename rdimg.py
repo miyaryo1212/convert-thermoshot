@@ -1,6 +1,8 @@
+import ctypes
 import datetime
 import math
 import os
+import pathlib
 import sys
 import tkinter
 import tkinter.filedialog
@@ -17,14 +19,19 @@ def choosefile():
     root.withdraw()
     fType = [("", "*")]
     iDir = os.path.abspath(os.path.dirname(__file__))
-    tkinter.messagebox.showinfo("rdimg.py", "F30サーモショットで撮影した320x240の画像を選択")
-    file = tkinter.filedialog.askopenfilename(filetypes=fType, initialdir=iDir)
+    tkinter.messagebox.showinfo("rdimg.py", "F30サーモショットで撮影した画像を選択")
+    files = tkinter.filedialog.askopenfilenames(
+        filetypes=fType, initialdir=iDir
+    )
 
-    if not file:
-        tkinter.messagebox.showinfo("rdimg.py", "画像を選択してください。プログラムを終了します。")
+    if not files:
+        tkinter.messagebox.showinfo("[Error] rdimg.py", "画像が選択されませんでした")
         quit()
 
-    return file
+    files = list(files)
+    # print(files)
+
+    return files
 
 
 def askminmax():
@@ -61,7 +68,7 @@ def askminmax():
     root.withdraw()
 
     if not (editbox_min.get() or editbox_max.get()):
-        tkinter.messagebox.showinfo("rdimg.py", "設定温度を入力してください。プログラムを終了します。")
+        tkinter.messagebox.showinfo("rdimg.py", "設定温度が正しく入力されませんでした")
         quit()
 
     min, max = float(editbox_min.get()), float(editbox_max.get())
@@ -70,18 +77,21 @@ def askminmax():
 
 
 def rdimg(src, min, max):
+    print("[info] {} loading".format(src))
     img = cv.imread(src)
     img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     h, s, v = cv.split(img_hsv)
 
-    for y in range(240):
-        for x in range(320):
+    print("[info] {} processing".format(src))
+    for y in range(len(v)):
+        for x in range(len(v[0])):
             v[y][x] = min + ((max - min) / 255 * v[y][x])
 
-    cv.imshow("img", img)
+    # cv.imshow("rdimg.py - Press Esc to continue", img)
     # cv.imshow("img hsv", img_hsv)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
+    print("[info] {} finished".format(src))
 
     return v
 
@@ -107,24 +117,33 @@ def cvtlist(list, path):
 
 
 if __name__ == "__main__":
-    import ctypes
-
     try:
         ctypes.windll.shcore.SetProcessDpiAwareness(True)
     except:
         pass
 
-    src = choosefile()
-
+    srcs = choosefile()
     temp_min, temp_max = askminmax()
 
-    v = rdimg(src, temp_min, temp_max)
+    saved_filenames = []
 
-    time_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    path = "./output/saved_{}.xlsx".format(time_now)
-    cvtlist(v, path)
+    for src in srcs:
+        v = rdimg(src, temp_min, temp_max)
 
-    print('Saved in to "saved_{}.xlsx"'.format(time_now))
-    tkinter.messagebox.showinfo(
-        "rdimg.py", 'Saved into "saved_{}.xlsx"'.format(time_now)
-    )
+        dir = "./output"
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+
+        src = pathlib.Path(src)
+
+        # time_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        path = "./output/file_{}.xlsx".format(src.stem)
+        cvtlist(v, path)
+
+        saved_filenames.append("file_{}.xlsx".format(src.stem))
+
+    save_message = "Saved into:"
+    for name in saved_filenames:
+        save_message += "\n{}".format(name)
+
+    tkinter.messagebox.showinfo("rdimg.py", save_message)
