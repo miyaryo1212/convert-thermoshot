@@ -12,20 +12,31 @@ import cv2 as cv
 import matplotlib as plt
 import numpy as np
 import openpyxl as opxl
+from openpyxl.utils import get_column_letter
 
 
-def choosefile():
+def showmsgbox(title, content):
+    root = tkinter.Tk()
+    root.withdraw()
+    tkinter.messagebox.showinfo(title, content)
+
+
+def choosefiles():
     root = tkinter.Tk()
     root.withdraw()
     fType = [("", "*")]
     iDir = os.path.abspath(os.path.dirname(__file__))
-    tkinter.messagebox.showinfo("rdimg.py", "F30サーモショットで撮影した画像を選択")
+    tkinter.messagebox.showinfo(
+        "convert-thrmoshot", "F30サーモショットで撮影したグレースケール画像を選択"
+    )
     files = tkinter.filedialog.askopenfilenames(
         filetypes=fType, initialdir=iDir
     )
 
     if not files:
-        tkinter.messagebox.showinfo("[Error] rdimg.py", "画像が選択されませんでした")
+        tkinter.messagebox.showinfo(
+            "[Error] convert-thrmoshot", "画像が選択されませんでした"
+        )
         quit()
 
     files = list(files)
@@ -68,7 +79,7 @@ def askminmax():
     root.withdraw()
 
     if not (editbox_min.get() or editbox_max.get()):
-        tkinter.messagebox.showinfo("rdimg.py", "設定温度が正しく入力されませんでした")
+        tkinter.messagebox.showinfo("convert-thrmoshot", "設定温度が正しく入力されませんでした")
         quit()
 
     min, max = float(editbox_min.get()), float(editbox_max.get())
@@ -77,43 +88,52 @@ def askminmax():
 
 
 def rdimg(src, min, max):
-    print("[info] {} loading".format(src))
+    print("INFO: {} loading".format(src))
     img = cv.imread(src)
     img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     h, s, v = cv.split(img_hsv)
 
-    print("[info] {} processing".format(src))
+    print("INFO: {} processing...".format(src))
     for y in range(len(v)):
         for x in range(len(v[0])):
             v[y][x] = min + ((max - min) / 255 * v[y][x])
 
-    # cv.imshow("rdimg.py - Press Esc to continue", img)
+    # cv.imshow("convert-thrmoshot - Press Esc to continue", img)
     # cv.imshow("img hsv", img_hsv)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
-    print("[info] {} finished".format(src))
+    print("INFO: {} finished".format(src))
 
     return v
 
 
-def cvtlist(list, path):
-    wb = opxl.Workbook()
-    sheet = wb.worksheets[0]
+def cvtsheet(workbook, bookpath, list, sheetname):
+    sheet = workbook.create_sheet(title=sheetname)
 
-    for y in range(240):
-        for x in range(320):
+    print("INFO: {} updating with {}...".format(bookpath, sheetname))
+    for y in range(len(v)):
+        for x in range(len(v[0])):
             list_value = list[y][x]
             sheet.cell(y + 1, x + 1, list_value)
+    print("INFO: {} updated with {}".format(bookpath, sheetname))
 
-    """
-    for row_num in range(240):
-        sheet.row_dimensions[row_num + 1].height = 20
+    workbook.save(bookpath)
 
-    for column_num in range(320):
-        sheet.column_dimensions[column_num + 1].width = 20
-    """
 
-    wb.save(path)
+def formatcellstyles(workbook, bookpath):
+    print("INFO: {} formatting cell styles...".format(bookpath))
+    for sheet in workbook:
+        for row_num in sheet.rows:
+            row = row_num[0].row
+            sheet.row_dimensions[row].height = 18
+
+        for column_num in sheet.columns:
+            column = column_num[0].column
+            sheet.column_dimensions[get_column_letter(column)].width = 3.5
+
+    workbook.save(bookpath)
+    print("INFO: {} formated cell styles".format(bookpath))
+    return
 
 
 if __name__ == "__main__":
@@ -122,28 +142,27 @@ if __name__ == "__main__":
     except:
         pass
 
-    srcs = choosefile()
+    srcs = choosefiles()
     temp_min, temp_max = askminmax()
 
-    saved_filenames = []
+    wb = opxl.Workbook()
+    time_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    dir = "./saved"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    bookpath = "./saved/runned_{}.xlsx".format(time_now)
+
+    row_num, clumnn_num = 0, 0
 
     for src in srcs:
+        filename = pathlib.Path(src).stem
+
         v = rdimg(src, temp_min, temp_max)
+        row_num, clumnn_num = len(v), len(v[0])
 
-        dir = "./output"
-        if not os.path.exists(dir):
-            os.makedirs(dir)
+        cvtsheet(wb, bookpath, v, filename)
 
-        src = pathlib.Path(src)
-
-        # time_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        path = "./output/file_{}.xlsx".format(src.stem)
-        cvtlist(v, path)
-
-        saved_filenames.append("file_{}.xlsx".format(src.stem))
-
-    save_message = "Saved into:"
-    for name in saved_filenames:
-        save_message += "\n{}".format(name)
-
-    tkinter.messagebox.showinfo("rdimg.py", save_message)
+    formatcellstyles(wb, bookpath)
+    print("INFO: Saved to {}".format(bookpath))
+    print("INFO: All operations have been completed")
+    showmsgbox("convert-thrmoshot", "{} に保存済み".format(bookpath))
