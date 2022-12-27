@@ -4,6 +4,7 @@ import os
 import pathlib
 import tkinter
 import tkinter.filedialog
+import time
 import tkinter.messagebox
 
 import cv2 as cv
@@ -104,15 +105,15 @@ def rdimg(src, min, max):
 
 
 def cvtsheet(workbook, bookpath, list, sheetname):
+    print("INFO: {} updating with {}...".format(bookpath, sheetname))
     sheet = workbook.create_sheet(title=sheetname)
 
-    print("INFO: {} updating with {}...".format(bookpath, sheetname))
     for y in range(len(v)):
         for x in range(len(v[0])):
             list_value = list[y][x]
             sheet.cell(y + 1, x + 1, list_value)
-    print("INFO: {} updated with {}".format(bookpath, sheetname))
 
+    print("INFO: {} updated with {}".format(bookpath, sheetname))
     workbook.save(bookpath)
 
 
@@ -150,13 +151,26 @@ if __name__ == "__main__":
 
     row_num, clumnn_num = 0, 0
 
+    loaded_num = 0
+
     for src in srcs:
+        if not (len(srcs) - loaded_num) == 1:
+            print(
+                "INFO: {} / {} files remaining".format(
+                    (len(srcs) - loaded_num), len(srcs)
+                )
+            )
+        else:
+            print("INFO: 1 / {} file remaining".format(len(srcs)))
+
         filename = pathlib.Path(src).stem
 
         v = rdimg(src, temp_min, temp_max)
         row_num, clumnn_num = len(v), len(v[0])
 
         cvtsheet(wb, bookpath, v, filename)
+
+        loaded_num += 1
 
     formatcellstyles(wb, bookpath)
     print("INFO: Saved to {}".format(bookpath))
