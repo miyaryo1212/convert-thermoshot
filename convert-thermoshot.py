@@ -24,7 +24,7 @@ def choosefiles():
     fType = [("", "*")]
     iDir = os.path.abspath(os.path.dirname(__file__))
     tkinter.messagebox.showinfo(
-        "convert-thrmoshot", "F30サーモショットで撮影したグレースケール画像を選択"
+        "convert-thermoshot", "F30サーモショットで撮影したグレースケール画像を選択"
     )
     files = tkinter.filedialog.askopenfilenames(
         filetypes=fType, initialdir=iDir
@@ -32,7 +32,7 @@ def choosefiles():
 
     if not files:
         tkinter.messagebox.showinfo(
-            "[Error] convert-thrmoshot", "画像が選択されませんでした"
+            "[Error] convert-thermoshot", "画像が選択されませんでした"
         )
         quit()
 
@@ -76,7 +76,7 @@ def askminmax():
     root.withdraw()
 
     if not (editbox_min.get() or editbox_max.get()):
-        tkinter.messagebox.showinfo("convert-thrmoshot", "設定温度が正しく入力されませんでした")
+        tkinter.messagebox.showinfo("convert-thermoshot", "設定温度が正しく入力されませんでした")
         quit()
 
     min, max = float(editbox_min.get()), float(editbox_max.get())
@@ -95,7 +95,7 @@ def rdimg(src, min, max):
         for x in range(len(v[0])):
             v[y][x] = min + ((max - min) / 255 * v[y][x])
 
-    # cv.imshow("convert-thrmoshot - Press Esc to continue", img)
+    # cv.imshow("convert-thermoshot - Press Esc to continue", img)
     # cv.imshow("img hsv", img_hsv)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
@@ -175,4 +175,4 @@ if __name__ == "__main__":
     formatcellstyles(wb, bookpath)
     print("INFO: Saved to {}".format(bookpath))
     print("INFO: All operations have been completed")
-    showmsgbox("convert-thrmoshot", "{} に保存済み".format(bookpath))
+    showmsgbox("convert-thermoshot", "{} に保存済み".format(bookpath))
