@@ -2,15 +2,17 @@ import ctypes
 import datetime
 import os
 import pathlib
-import pprint
 import time
 import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
 from tkinter import ttk
-import numpy as np
 
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 import openpyxl as opxl
+from mpl_toolkits.mplot3d import Axes3D
 from openpyxl.utils import get_column_letter
 
 
@@ -113,6 +115,32 @@ def writesheet(bookpath, sheetname, list):
     return None
 
 
+def showplot(list):
+    x, y, z = 0, 0, 0
+    dx, dy, dz = 1, 1, 1
+
+    fig = plt.figure(figsize=(9, 8))
+    ax = fig.add_subplot(111, projection="3d")
+
+    top = x + y
+    bottom = np.zeros_like(top)
+    width = depth = 1
+
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    ax.set_title("No Title")
+
+    for y in range(len(list)):
+        for x in range(len(list[0])):
+            z = list[y][x]
+            ax.bar3d(x, y, bottom, width, depth, z, shade=True)
+
+    plt.show()
+
+    return None
+
+
 if __name__ == "__main__":
     try:
         ctypes.windll.shcore.SetProcessDpiAwareness(True)
@@ -140,4 +168,6 @@ if __name__ == "__main__":
     if not os.path.exists(dir):
         os.makedirs(dir)
     bookpath = "./saved/runned_{}.xlsx".format(time_now)
-    writesheet(bookpath, ("{}-{}".format(sheets[0], sheets[1])), list_delta)
+    writesheet(bookpath, ("{}-{}".format(sheets[1], sheets[0])), list_delta)
+    print("INFO: preparing plot...")
+    showplot(list_delta)
