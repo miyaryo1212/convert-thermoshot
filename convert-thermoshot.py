@@ -4,7 +4,6 @@ import os
 import pathlib
 import tkinter
 import tkinter.filedialog
-import time
 import tkinter.messagebox
 
 import cv2 as cv

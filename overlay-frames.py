@@ -1,19 +1,13 @@
 import copy
 import ctypes
-import datetime
-import math
 import os
 import pathlib
-import sys
-import time
 import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
 
 import cv2 as cv
-import matplotlib as plt
 import numpy as np
-import openpyxl as opxl
 import pyautogui
 
 
