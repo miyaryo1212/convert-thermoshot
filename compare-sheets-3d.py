@@ -163,7 +163,7 @@ def showplot(mode, list, name):
     x, y, z = 0, 0, 0
     dx, dy, dz = 1, 1, 1
 
-    fig = plt.figure(figsize=(9, 8))
+    fig = plt.figure(figsize=(40, 30))
     ax = fig.add_subplot(111, projection="3d")
 
     top = x + y
@@ -211,9 +211,9 @@ def showplot(mode, list, name):
     else:
         pass
 
-    plt.savefig("./saved/figure_{}-{}.png".format(sheets[1], sheets[0]))
+    plt.savefig("./saved/figure3d_{}-{}.png".format(sheets[1], sheets[0]))
     print(
-        "INFO: Saved figure image to ./saved/figure_{}-{}.png".format(
+        "INFO: Saved figure image to ./saved/figure3d_{}-{}.png".format(
             sheets[1], sheets[0]
         )
     )
