@@ -6,7 +6,7 @@ import tkinter.filedialog
 import tkinter.messagebox
 from tkinter import ttk
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import openpyxl as opxl
 
@@ -15,6 +15,46 @@ def showmsgbox(title, content):
     root = tkinter.Tk()
     root.withdraw()
     tkinter.messagebox.showinfo(title, content)
+
+
+def selectmode():
+    root = tkinter.Tk()
+    root.withdraw()
+
+    root.title("select-mode")
+    root.geometry("300x130")
+
+    def ok_get(event):
+        root.quit()
+
+    var = tkinter.IntVar()
+    var.set(0)
+
+    radiobutton_rtp = tkinter.Radiobutton(
+        root, value=0, variable=var, text="shift-time"
+    )
+    radiobutton_tsp = tkinter.Radiobutton(
+        root, value=1, variable=var, text="real-time"
+    )
+    radiobutton_rtp.grid(column=0, row=0, padx=20, pady=10)
+    radiobutton_tsp.grid(column=0, row=1, padx=20, pady=10)
+
+    button = tkinter.Button(root, text="OK")
+    button.bind("<Button-1>", ok_get)
+    button.grid(column=1, row=2, padx=20, pady=10)
+
+    root.bind("<Return>", ok_get)
+
+    root.deiconify()
+    root.mainloop()
+    root.withdraw()
+
+    if var.get() == None:
+        print("ERROR: Plotting mode was not select correctly")
+        showmsgbox("[ERROR] select-mode", "プロットモードが正しく選択されませんでした")
+        quit()
+
+    return var.get()
 
 
 def selectfile():
@@ -72,7 +112,7 @@ def selectsheets(list):
     root.withdraw()
 
     if not combo_before.get() or not combo_after.get():
-        print("ERROR: Sheets were not selected correctly")
+        print("ERROR: Sheets were not select correctly")
         showmsgbox("[Error] select-sheets", "シートが正しく選択されませんでした")
         quit()
 
@@ -110,7 +150,16 @@ def writesheet(bookpath, sheetname, list):
     return None
 
 
-def showplot(list):
+def showplot(mode, list, name):
+    if mode == 0:
+        matplotlib.use("Agg")
+    else:
+        pass
+
+    import matplotlib.pyplot as plt
+
+    print("INFO: generating plot...")
+
     x, y, z = 0, 0, 0
     dx, dy, dz = 1, 1, 1
 
@@ -124,14 +173,50 @@ def showplot(list):
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
-    ax.set_title("No Title")
+    ax.set_title(name)
+
+    color = 1
 
     for y in range(len(list)):
         for x in range(len(list[0])):
             z = list[y][x]
-            ax.bar3d(x, y, bottom, width, depth, z, shade=True)
+            if color == 1:
+                ax.bar3d(
+                    x,
+                    y,
+                    bottom,
+                    width,
+                    depth,
+                    z,
+                    shade=True,
+                    color="#FF4B00",
+                )
+                color *= -1
+            else:
+                ax.bar3d(
+                    x,
+                    y,
+                    bottom,
+                    width,
+                    depth,
+                    z,
+                    shade=True,
+                    color="#005AFF",
+                )
+                color *= -1
 
-    plt.show()
+    print("INFO: writing plot...")
+    if mode == 1:
+        plt.show()
+    else:
+        pass
+
+    plt.savefig("./saved/figure_{}-{}.png".format(sheets[1], sheets[0]))
+    print(
+        "INFO: Saved figure image to ./saved/figure_{}-{}.png".format(
+            sheets[1], sheets[0]
+        )
+    )
 
     return None
 
@@ -141,6 +226,8 @@ if __name__ == "__main__":
         ctypes.windll.shcore.SetProcessDpiAwareness(True)
     except:
         pass
+
+    mode = selectmode()
 
     src = selectfile()
     print("INFO: {} loading file...".format(src))
@@ -164,5 +251,12 @@ if __name__ == "__main__":
         os.makedirs(dir)
     bookpath = "./saved/runned_{}.xlsx".format(time_now)
     writesheet(bookpath, ("{}-{}".format(sheets[1], sheets[0])), list_delta)
-    print("INFO: preparing plot...")
-    showplot(list_delta)
+    print("INFO: Saved workbook to {}".format(bookpath))
+    showplot(mode, list_delta, "{}-{}".format(sheets[1], sheets[0]))
+    figurepath = "./saved/figure_{}-{}.png".format(sheets[1], sheets[0])
+
+    print("INFO: All operations have been completed")
+    showmsgbox(
+        "compare-sheets",
+        "ワークシート：\t{}\nグラフ：\t\t{}\nに保存済み".format(bookpath, figurepath),
+    )
